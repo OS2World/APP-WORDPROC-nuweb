@@ -1,0 +1,42 @@
+1c1
+< CC = cc
+---
+> CC = gcc
+3c3,5
+< CFLAGS = -O
+---
+> CFLAGS = -s -O -Wall
+> # for debugging with gdb only:
+> # CFLAGS = -g
+6a9,13
+> # for UNIX and such
+> # EXE    = 
+> # for OS/2 and the like
+> EXE    = .exe
+> 
+24c31
+< 	$(MAKE) $(TARGET)
+---
+> 	$(MAKE) $(TARGET)$(EXE)
+34c41
+< 	rm -f *.tex *.log *.dvi *~ *.blg
+---
+> 	echo rm -f *.tex *.log *.dvi *~ *.blg
+37c44
+< 	rm -f *.o *.c *.h *.tex *.log *.dvi *~ *.blg
+---
+> 	echo rm -f $(OBJS) *.c *.h *.tex *.log *.dvi *~ *.blg
+40c47
+< 	xdvi $(TARGET).dvi
+---
+> 	echo xdvi $(TARGET).dvi
+43c50
+< 	lpr -d $(TARGET).dvi
+---
+> 	echo lpr -d $(TARGET).dvi
+47,48c54,55
+< $(TARGET): $(OBJS)
+< 	$(CC) -o $(TARGET) $(OBJS)
+---
+> $(TARGET)$(EXE): $(OBJS)
+> 	$(CC) $(CFLAGS) -o $(TARGET)$(EXE) $(OBJS)

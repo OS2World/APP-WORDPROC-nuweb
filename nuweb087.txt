@@ -1,0 +1,81 @@
+
+I have uploaded nuweb087.zip including sources by Preson Briggs and
+the os/2 binary to :
+
+hobbes (ftp-os2.nmsu.edu), 
+now: /incoming
+suggested: /os2/unix/tex
+
+cdrom (ftp-os2.cdrom.com), 
+now: /os2/incoming
+suggested: /os2/tex
+
+and CTAN (ftp.shsu.edu):
+now: /incoming
+suggested: tex-archive/web/nuweb/os2/  (needs to be created).
+
+Replaces: Nothing really, except hopefully DOS versions of nuweb,
+          running on some OS/2 machines.
+
+Brief description:
+
+I was looking in news groups for a tool for literate programming (web)
+that'd allow me to use Fortran. (Extended) Pascal, and C and was portable
+to or available for OS/2. I came accross an interesting FAQ for the
+comp.literate.programming, and I got his personal reply:
+
+------------------------------------------------------------------------
+Preston Briggs (preston@cs.rice.edu) wrote:
+: >Also, my desire to have a version that (i) runs on OS/2 and (ii)
+: >possibly incorporates Extended ANSI Pasal, while (iii) being based on
+: >fweb to allow also g77 and gcc codes, made me think the -- for me very
+: >unusual -- cross posting would enlarge my cross section and hence the
+: >chance for an event ...
+
+: Lots of us have given up on the idea of pretty printing all our code,
+: and use language-independent tools.  For OS/2, you might check out
+: nuweb and funnelweb.  I wrote nuweb and unsurprisingly prefer it.  I
+: use it with C, C++, Fortran, Scheme, and Makefiles.  Others have used
+: it with Perl and such, but since it's language independent, you won't
+: have any trouble with any flavor of Pascal, etc.
+
+: You can grab a copy via anonymous ftp from cs.rice.edu, in the
+: directory public/preston.
+------------------------------------------------------------------------
+
+
+To make it short: here is the working OS/2 version, with executable,
+sources, and docs.
+
+All you need to use it is:
+a) LaTeX installed on your system (2.09 or 2e are fine)
+b) print the nuwebman.dvi or nuwebman.ps files, read them
+c) an editor
+d) the emx runtime system (emxrt.zip, from ftp-os2.cdrom.com, or
+   ftp-os2.nmsu.edu, for instance), version 0.9a fix pack 06 or 
+   later installed. If you don't have it already installed
+   fetch the index of one of these sites, and search (grep) for
+   the pattern "emxrt.zip", or, if you can use regular expressions,
+   "^emxrt.zip". Then download and istall it. It contains the runtime
+   system in a dynamic link library which is shared by many other 
+   programmes (say, gnu file utils, vi, emacs, less, probably even
+   emTeX programmes). This allows the executables to stay small and lean
+   but they won't run without it.
+e) put nuweb.exe in your path.
+
+It seems that this is the right tool for cs people who don't crave nice,
+mathematical pretty print stuff (like some physicists prefer), and for
+projects that involve mixing of languages, or involve languages that
+other webs don't know about. (I like fweb, too, but fweb can't do
+Extended Pascal, as an example, and so nuweb seems to be it for that
+case.)
+
+===============================================================================
+Stefan A. Deutscher   8-Mar-1996        |  (+1-423-)   voice      fax
+The University of Tennessee, Knoxville  |  UTK  :     974-7838  974-7843
+Department of Physics and Astronomy     |  ORNL :     574-5897  574-1118
+401, A. H. Nielsen Building             |  home :     522-7845  522-7845
+Knoxville, T.N. 37996-1200, USA         |  email:     sad@utk.edu
+ ... in Germany:                        |    stefand@elphy.irz.hu-berlin.de
+===============================================================================
+

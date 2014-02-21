@@ -1,0 +1,8 @@
+8a9,10
+>       char *tmp_dir_p  = ".";
+>       char *tmp_pref_p = "nuw";
+9a12
+> /*
+10a14,15
+> */
+>       char *temp_name = tempnam(tmp_dir_p, tmp_pref_p);

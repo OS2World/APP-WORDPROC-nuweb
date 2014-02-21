@@ -1,0 +1,55 @@
+CC = gcc
+
+CFLAGS = -s -O -Wall
+# for debugging with gdb only:
+# CFLAGS = -g
+
+TARGET = nuweb
+
+# for UNIX and such
+# EXE    = 
+# for OS/2 and the like
+EXE    = .exe
+
+OBJS = main.o pass1.o latex.o output.o input.o scraps.o names.o \
+	arena.o global.o
+
+.SUFFIXES: .tex .dvi .w
+
+.w.tex:
+	nuweb $*
+
+.tex.dvi:
+	latex $*
+
+.w.dvi:
+	$(MAKE) $*.tex
+	$(MAKE) $*.dvi
+
+all:
+	$(MAKE) $(TARGET).tex
+	$(MAKE) $(TARGET)$(EXE)
+
+shar:	$(TARGET).tex
+	cp blurb nuweb.tex
+	shar -o $(TARGET).shar Makefile README literate.bib nuweb.w \
+		nuweb.tex arena.c input.c latex.c main.c names.c \
+		output.c pass1.c scraps.c global.c global.h nuweb.bbl
+	rm -f nuweb.tex
+
+clean:
+	echo rm -f *.tex *.log *.dvi *~ *.blg
+
+veryclean:
+	echo rm -f $(OBJS) *.c *.h *.tex *.log *.dvi *~ *.blg
+
+view:	$(TARGET).dvi
+	echo xdvi $(TARGET).dvi
+
+print:	$(TARGET).dvi
+	echo lpr -d $(TARGET).dvi
+
+$(OBJS): global.h
+
+$(TARGET)$(EXE): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET)$(EXE) $(OBJS)

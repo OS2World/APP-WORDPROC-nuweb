@@ -1,0 +1,375 @@
+\documentstyle{article}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\setlength{\textheight}{8.9in}
+\setlength{\textwidth}{6.5in}
+\setlength{\marginparwidth}{0.5in}
+
+\title{Nuweb \\ A Simple Literate Programming Tool}
+\date{Preston Briggs \\ \sl preston@cs.rice.edu}
+\author{(Version 0.87)}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In 1984, Knuth introduced the idea of {\em literate programming\/} and
+described a pair of tools to support the practise~\cite{knuth:84}.
+His approach was to combine Pascal code with \TeX\ documentation to
+produce a new language, \verb|WEB|, that offered programmers a superior
+approach to programming. He wrote several programs in \verb|WEB|,
+including \verb|weave| and \verb|tangle|, the programs used to support
+literate programming.
+The idea was that a programmer wrote one document, the web file, that
+combined documentation (written in \TeX~\cite{texbook}) with code
+(written in Pascal).
+
+Running \verb|tangle| on the web file would produce a complete
+Pascal program, ready for compilation by an ordinary Pascal compiler.
+The primary function of \verb|tangle| is to allow the programmer to
+present elements of the program in any desired order, regardless of
+the restrictions imposed by the programming language. Thus, the
+programmer is free to present his program in a top-down fashion,
+bottom-up fashion, or whatever seems best in terms of promoting
+understanding and maintenance.
+
+Running \verb|weave| on the web file would produce a \TeX\ file, ready
+to be processed by \TeX\@. The resulting document included a variety of
+automatically generated indices and cross-references that made it much
+easier to navigate the code. Additionally, all of the code sections
+were automatically pretty printed, resulting in a quite impressive
+document. 
+
+Knuth also wrote the programs for \TeX\ and {\small\sf METAFONT}
+entirely in \verb|WEB|, eventually publishing them in book
+form~\cite{tex:program,metafont:program}. These are probably the
+largest programs ever published in a readable form.
+
+Inspired by Knuth's example, many people have experimented with
+\verb|WEB|\@. Some people have even built web-like tools for their
+own favorite combinations of programming language and typesetting
+language. For example, \verb|CWEB|, Knuth's current system of choice,
+works with a combination of C (or C++) and \TeX~\cite{levy:90}.
+Another system, FunnelWeb, is independent of any programming language
+and only mildly dependent on \TeX~\cite{funnelweb}. Inspired by the
+versatility of FunnelWeb and by the daunting size of its
+documentation, I decided to write my own, very simple, tool for
+literate programming.%
+\footnote{There is another system similar to
+mine, written by Norman Ramsey, called {\em noweb}~\cite{noweb}. It
+perhaps suffers from being overly Unix-dependent and requiring several
+programs to use. On the other hand, its command syntax is very nice.
+In any case, nuweb certainly owes its name and a number of features to
+his inspiration.}
+
+
+\section{Nuweb}
+
+Nuweb works with any programming language and \LaTeX~\cite{latex}. I
+wanted to use \LaTeX\ because it supports a multi-level sectioning
+scheme and has facilities for drawing figures. I wanted to be able to
+work with arbitrary programming languages because my friends and I
+write programs in many languages (and sometimes combinations of
+several languages), {\em e.g.,} C, Fortran, C++, yacc, lex, Scheme,
+assembly, Postscript, and so forth. The need to support arbitrary
+programming languages has many consequences:
+\begin{description}
+\item[No pretty printing] Both \verb|WEB| and \verb|CWEB| are able to
+  pretty print the code sections of their documents because they
+  understand the language well enough to parse it. Since we want to use
+  {\em any\/} language, we've got to abandon this feature.
+\item[No index of identifiers] Because \verb|WEB| knows about Pascal,
+  it is able to construct an index of all the identifiers occurring in
+  the code sections (filtering out keywords and the standard type
+  identifiers). Unfortunately, this isn't as easy in our case. We don't
+  know what an identifiers looks like in each language and we certainly
+  don't know all the keywords. (On the other hand, see the end of
+  Section~1.3)
+\end{description}
+Of course, we've got to have some compensation for our losses or the
+whole idea would be a waste. Here are the advantages I can see:
+\begin{description}
+\item[Simplicity] The majority of the commands in \verb|WEB| are
+  concerned with control of the automatic pretty printing. Since we
+  don't pretty print, many commands are eliminated. A further set of
+  commands is subsumed by \LaTeX\  and may also be eliminated. As a
+  result, our set of commands is reduced to only four members (explained
+  in the next section). This simplicity is also reflected in
+  the size of this tool, which is quite a bit smaller than the tools
+  used with other approaches.
+\item[No pretty printing] Everyone disagrees about how their code
+  should look, so automatic formatting annoys many people. One approach
+  is to provide ways to control the formatting. Our approach is simpler
+  -- we perform no automatic formatting and therefore allow the
+  programmer complete control of code layout.
+\item[Control] We also offer the programmer complete control of the
+  layout of his output files (the files generated during tangling). Of
+  course, this is essential for languages that are sensitive to layout;
+  but it is also important in many practical situations, {\em e.g.,}
+  debugging.
+\item[Speed] Since nuweb doesn't do to much, the nuweb tool runs
+  quickly. I combine the functions of \verb|tangle| and \verb|weave| into
+  a single program that performs both functions at once.
+\item[Page numbers] Inspired by the example of noweb, nuweb refers to
+  all scraps by page number to simplify navigation. If there are
+  multiple scraps on a page (say page~17), they are distinguished by
+  lower-case letters ({\em e.g.,} 17a, 17b, and so forth).
+\item[Multiple file output] The programmer may specify more than one
+  output file in a single nuweb file. This is required when constructing
+  programs in a combination of languages (say, Fortran and C)\@. It's also
+  an advantage when constructing very large programs that would require
+  a lot of compile time.
+\end{description}
+This last point is very important. By allowing the creation of
+multiple output files, we avoid the need for monolithic programs.
+Thus we support the creation of very large programs by groups of
+people. 
+
+A further reduction in compilation time is achieved by first
+writing each output file to a temporary location, then comparing the
+temporary file with the old version of the file. If there is no
+difference, the temporary file can be deleted. If the files differ,
+the old version is deleted and the temporary file renamed. This
+approach works well in combination with \verb|make| (or similar tools),
+since \verb|make| will avoid recompiling untouched output files.
+
+
+\section{Writing Nuweb}
+
+The bulk of a nuweb file will be ordinary \LaTeX\@. In fact, any \LaTeX\
+file can serve as input to nuweb and will be simply copied through
+unchanged to the \verb|.tex| file -- unless a nuweb command is
+discovered. All nuweb commands begin with an ``at-sign'' (\verb|@|).
+Therefore, a file without at-signs will be copied unchanged.
+Nuweb commands are used to specify {\em output files,} define 
+{\em macros,} and delimit {\em scraps}. These are the basic features
+of interest to the nuweb tool -- all else is simply text to be copied
+to the \verb|.tex| file.
+
+\subsection{The Major Commands}
+
+Files and macros are defined with the following commands:
+\begin{description}
+\item[{\tt @o} {\em file-name flags scrap\/}] Output a file. The file name is
+  terminated by whitespace.
+\item[{\tt @d} {\em macro-name scrap\/}] Define a macro. The macro name
+  is terminated by a return or the beginning of a scrap.
+\end{description}
+A specific file may be specified several times, with each definition
+being written out, one after the other, in the order they appear.
+The definitions of macros may be similarly divided.
+
+\subsubsection{Scraps}
+
+Scraps have specific begin markers and end markers to allow precise
+control over the contents and layout. Note that any amount of
+whitespace (including carriage returns) may appear between a name and
+the beginning of a scrap.
+\begin{description}
+\item[\tt @\{{\em anything\/}@\}] where the scrap body includes every
+  character in {\em anything\/} -- all the blanks, all the tabs, all the
+  carriage returns.
+\end{description}
+Inside a scrap, we may invoke a macro.
+\begin{description}
+\item[\tt @<{\em macro-name\/}@>] Causes the macro 
+  {\em macro-name\/} to be expanded inline as the code is written out
+  to a file. It is an error to specify recursive macro invocations.
+\end{description}
+Note that macro names may be abbreviated, either during invocation or
+definition. For example, it would be very tedious to have to
+repeatedly type the macro name
+\begin{quote}
+\verb|@d Check for terminating at-sequence and return name if found|
+\end{quote}
+Therefore, we provide a mechanism (stolen from Knuth) of indicating
+abbreviated names.
+\begin{quote}
+\verb|@d Check for terminating...|
+\end{quote}
+Basically, the programmer need only type enough characters to uniquely
+identify the macro name, followed by three periods. An abbreviation
+may even occur before the full version; nuweb simply preserves the
+longest version of a macro name. Note also that blanks and tabs are
+insignificant in a macro name; any string of them are replaced by a
+single blank.
+
+When scraps are written to an output or \verb|.tex| file, tabs are
+expanded into spaces by default. Currently, I assume tab stops are set
+every eight characters. Furthermore, when a macro is expanded in a scrap,
+the body of the macro is indented to match the indentation of the
+macro invocation. Therefore, care must be taken with languages 
+({\em e.g.,} Fortran) that are sensitive to indentation.
+These default behaviors may be changed for each output file (see
+below).
+
+\subsubsection{Flags}
+
+When defining an output file, the programmer has the option of using
+flags to control output of a particular file. The flags are intended
+to make life a little easier for programmers using certain languages.
+They introduce little language dependences; however, they do so only
+for a particular file. Thus it is still easy to mix languages within a
+single document. There are three ``per-file'' flags:
+\begin{description}
+\item[\tt -d] Forces the creation of \verb|#line| directives in the
+  output file. These are useful with C (and sometimes C++ and Fortran) on
+  many Unix systems since they cause the compiler's error messages to
+  refer to the web file rather than the output file. Similarly, they
+  allow source debugging in terms of the web file.
+\item[\tt -i] Suppresses the indentation of macros. That is, when a
+  macro is expanded in a scrap, it will {\em not\/} be indented to
+  match the indentation of the macro invocation. This flag would seem
+  most useful for Fortran programmers.
+\item[\tt -t] Suppresses expansion of tabs in the output file. This
+  feature seems important when generating \verb|make| files.
+\end{description}
+
+
+\subsection{The Minor Commands}
+
+We have two very low-level utility commands that may appear anywhere
+in the web file.
+\begin{description}
+\item[\tt @@] Causes a single ``at sign'' to be copied into the output.
+\item[\tt @i {\em file-name\/}] Includes a file. Includes may be
+  nested, though there is currently a limit of 10~levels. The file name
+  should be complete (no extension will be appended) and should be
+  terminated by a carriage return.
+\end{description}
+Finally, there are three commands used to create indices to the macro
+names, file definitions, and user-specified identifiers.
+\begin{description}
+\item[\tt @f] Create an index of file names.
+\item[\tt @m] Create an index of macro name.
+\item[\tt @u] Create an index of user-specified identifiers.
+\end{description}
+I usually put these in their own section
+in the \LaTeX\ document.
+
+Identifiers must be explicitely specified for inclusion in the
+\verb|@u| index. By convention, each identifier is marked at the
+point of its definition; all references to each identifier (inside
+scraps) will be discovered automatically. To ``mark'' an identifier
+for inclusion in the index, we must mention it at the end of a scrap.
+For example,
+\begin{quote}
+\begin{verbatim}
+@d a scrap @{
+Let's pretend we're declaring the variables FOO and BAR
+inside this scrap.
+@| FOO BAR @}
+\end{verbatim}
+\end{quote}
+I've used alphabetic identifiers in this example, but any string of
+characters (not including whitespace or \verb|@| characters) will do.
+Therefore, it's possible to add index entries for things like
+\verb|<<=| if desired. An identifier may be declared in more than one
+scrap.
+
+In the generated index, each identifier appears with a list of all the
+scraps using and defining it, where the defining scraps are
+distinguished by underlining. Note that the identifier doesn't
+actually have to appear in the defining scrap; it just has to be in
+the list of definitions at the end of a scrap.
+
+
+\section{Running Nuweb}
+
+Nuweb is invoked using the following command:
+\begin{quote}
+{\tt nuweb} {\em flags file-name}\ldots
+\end{quote}
+One or more files may be processed at a time. If a file name has no
+extension, \verb|.w| will be appended. While a file name may specify a
+file in another directory, the resulting \verb|.tex| file will always
+be created in the current directory. For example,
+\begin{quote}
+{\tt nuweb /foo/bar/quux}
+\end{quote}
+will take as input the file \verb|/foo/bar/quux.w| and will create the
+file \verb|quux.tex| in the current directory.
+
+By default, nuweb performs both tangling and weaving at the same time.
+Normally, this is not a bottleneck in the compilation process;
+however, it's possible to achieve slightly faster throughput by
+avoiding one or another of the default functions using command-line
+flags. There are currently three possible flags:
+\begin{description}
+\item[\tt -t] Suppress generation of the \verb|.tex| file.
+\item[\tt -o] Suppress generation of the output files.
+\item[\tt -c] Avoid testing output files for change before updating them.
+\end{description}
+Thus, the command
+\begin{quote}
+\verb|nuweb -to /foo/bar/quux|
+\end{quote}
+would simply scan the input and produce no output at all.
+
+There are two additional command-line flags:
+\begin{description}
+\item[\tt -v] For ``verbose,'' causes nuweb to write information about
+  its progress to \verb|stderr|.
+\item[\tt -n] Forces scraps to be numbered sequentially from~1
+  (instead of using page numbers). This form is perhaps more desirable
+  for small webs.
+\end{description}
+
+
+\section{Restrictions}
+
+Because nuweb is intended to be a simple tool, I've established a few
+restrictions. Over time, some of these may be eliminated; others seem
+fundamental.
+\begin{itemize}
+\item The handling of errors is not completely ideal. In some cases, I
+  simply warn of a problem and continue; in other cases I halt
+  immediately. This behavior should be regularized.
+\item I warn about references to macros that haven't been defined, but
+  don't halt. This seems most convenient for development, but may change
+  in the future.
+\item File names and index entries should not contain any \verb|@|
+  signs.
+\item Macro names may be (almost) any well-formed \TeX\ string.
+  It makes sense to change fonts or use math mode; however, care should
+  be taken to ensure matching braces, brackets, and dollar signs.
+\item Anything is allowed in the body of a scrap; however, very
+  long scraps (horizontally or vertically) may not typeset well.
+\item Temporary files (created for comparison to the eventual
+  output files) are placed in the current directory. Since they may be
+  renamed to an output file name, all the output files should be on the
+  same file system as the current directory.
+\item Because page numbers cannot be determined until the document has
+  been typeset, we have to rerun nuweb after \LaTeX\ to obtain a clean
+  version of the document (very similar to the way we sometimes have
+  to rerun \LaTeX\ to obtain an up-to-date table of contents after
+  significant edits).  Nuweb will warn (in most cases) when this needs
+  to be done; in the remaining cases, \LaTeX\ will warn that labels
+  may have changed.
+\end{itemize}
+Very long scraps may be allowed to break across a page if declared
+with \verb|@O| or \verb|@D| (instead of \verb|@o| and \verb|@d|).
+This doesn't work very well as a default, since far too many short
+scraps will be broken across pages; however, as a user-controlled
+option, it seems very useful.
+
+\section{Acknowledgements}
+
+Several people have contributed their times, ideas, and debugging
+skills. In particular, I'd like to acknowledge the contributions of
+Osman Buyukisik, Manuel Carriba, Adrian Clarke, Tim Harvey, Michael
+Lewis, Norman Ramsey, Walter Ravenek, Rob Shillingsburg, Kayvan
+Sylvan, Dominique de~Waleffe, and Scott Warren.  Of course, most of
+these people would never have heard or nuweb (or many other tools)
+without the efforts of George Greenwade.
+
+
+\bibliographystyle{plain}
+\bibliography{literate}
+
+\end{document}

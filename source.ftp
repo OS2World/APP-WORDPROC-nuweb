@@ -1,0 +1,19 @@
+Preston Briggs (preston@cs.rice.edu) wrote:
+: >Also, my desire to have a version that (i) runs on OS/2 and (ii)
+: >possibly incorporates Extended ANSI Pasal, while (iii) being based on
+: >fweb to allow also g77 and gcc codes, made me think the -- for me very
+: >unusual -- cross posting would enlarge my cross section and hence the
+: >chance for an event ...
+
+: Lots of us have given up on the idea of pretty printing all our code,
+: and use language-independent tools.  For OS/2, you might check out
+: nuweb and funnelweb.  I wrote nuweb and unsurprisingly prefer it.  I
+: use it with C, C++, Fortran, Scheme, and Makefiles.  Others have used
+: it with Perl and such, but since it's language independent, you won't
+: have any trouble with any flavor of Pascal, etc.
+
+: You can grab a copy via anonymous ftp from cs.rice.edu, in the
+: directory public/preston.
+
+Use ftp and biary mode, lynx clobbers it to a point where it doesn't
+compile.
